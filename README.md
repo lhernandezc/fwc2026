@@ -1,6 +1,8 @@
 # FIFA Mundial 2026 Tracker
 
-App de seguimiento del Mundial FIFA 2026 — grupos, posiciones en tiempo real, Drama Index y bracket automático.
+App de seguimiento del Mundial FIFA 2026 — grupos, posiciones en tiempo real, Drama Index y bracket automático. 
+
+Generado utilizando Claude Sonnet 4.6. Dirección Creativa: Leonardo Hernandez
 
 ## Stack
 - React 18
