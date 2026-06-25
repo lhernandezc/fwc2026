@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { GROUPS, MATCHES, calcStandings, getFacts, getTeam, isGroupComplete, thirdsWithStatus } from "../data";
 
 // ── Los Colados ──────────────────────────────────────────────────────────────
@@ -64,15 +64,15 @@ function LosColados({ scores }) {
                     const isIn = idx < 8;
                     const isCutLine = idx === 8;
                     return (
-                      <>
+                      <React.Fragment key={t.c}>
                         {isCutLine && (
-                          <tr key="cutline" className="colados-cutline">
+                          <tr className="colados-cutline">
                             <td colSpan={11}>
                               <div className="cutline-label">— fuera del corte —</div>
                             </td>
                           </tr>
                         )}
-                        <tr key={t.c} className={
+                        <tr className={
                           t.status === "confirmed" ? "colados-row-confirmed" :
                           isIn ? "colados-row-in" : "colados-row-out"
                         }>
@@ -95,7 +95,7 @@ function LosColados({ scores }) {
                           <td><strong>{t.pts}</strong></td>
                           <td><StatusBadge t={t} /></td>
                         </tr>
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
