@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GROUPS, MATCHES, calcStandings, getFacts, getTeam, isGroupComplete, thirdsWithStatus } from "../data";
+import { GROUPS, MATCHES, calcStandings, bestThirds, getFacts, getTeam, isGroupComplete, thirdsWithStatus } from "../data";
 
 // ── Los Colados ──────────────────────────────────────────────────────────────
 function StatusBadge({ t }) {
