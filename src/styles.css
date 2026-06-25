@@ -266,3 +266,78 @@ body {
   min-width: 14px;
   text-align: center;
 }
+
+/* ── LOS COLADOS ─────────────────────────────────────────────────────────── */
+.colados-section {
+  background: #273347;
+  border-radius: 12px;
+  border: 0.5px solid #2d3f55;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.colados-header {
+  width: 100%; background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; font-family: inherit;
+}
+.colados-header:hover { background: rgba(255,255,255,0.03); }
+.colados-header-left { display: flex; align-items: baseline; gap: 10px; }
+.colados-title { font-size: 14px; font-weight: 500; color: #f1f5f9; }
+.colados-subtitle { font-size: 11px; color: #8892a4; }
+.colados-chevron { font-size: 10px; color: #8892a4; }
+
+.colados-body { padding: 0 0 8px; }
+.colados-empty { padding: 16px; font-size: 12px; color: #8892a4; text-align: center; }
+.colados-notice {
+  margin: 8px 12px; padding: 6px 10px;
+  background: rgba(243,156,18,0.08); border: 0.5px solid rgba(243,156,18,0.2);
+  border-radius: 6px; font-size: 11px; color: #c49a1a;
+}
+
+.colados-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.colados-table th {
+  padding: 5px 6px; text-align: center; font-weight: 400;
+  font-size: 10px; color: #8892a4;
+  background: #1e2939; border-bottom: 0.5px solid #2d3f55;
+}
+.colados-table th:nth-child(2) { text-align: left; padding-left: 8px; }
+.colados-table td { padding: 5px 6px; text-align: center; color: #f1f5f9; border-top: 0.5px solid #1e2939; }
+.colados-table td:nth-child(2) { text-align: left; }
+
+.colados-row-in { background: rgba(26,92,53,0.08); }
+.colados-row-out { background: transparent; opacity: 0.7; }
+
+.colados-cutline td { padding: 0; border: none; }
+.cutline-label {
+  text-align: center; font-size: 10px; color: #8892a4;
+  padding: 4px 0; border-top: 1px dashed #e74c3c;
+  border-bottom: 1px dashed #e74c3c; background: rgba(231,76,60,0.05);
+  letter-spacing: 0.5px;
+}
+
+.colados-pos { width: 28px; }
+.colados-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 500;
+}
+.num-in { background: #1a5c35; color: #fff; }
+.num-out { background: #2d3f55; color: #8892a4; }
+
+.colados-team-cell { display: flex; align-items: center; gap: 5px; }
+.colados-flag { font-size: 14px; flex-shrink: 0; }
+.colados-name { font-size: 11px; white-space: nowrap; }
+.colados-prov { font-size: 10px; color: #f5a623; font-weight: 700; }
+.colados-group { color: #8892a4; font-size: 10px; }
+
+.colados-done { font-size: 10px; color: #27ae60; font-weight: 500; white-space: nowrap; }
+.colados-pending { font-size: 10px; color: #f5a623; white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .colados-table th:nth-child(5),
+  .colados-table th:nth-child(6),
+  .colados-table th:nth-child(7),
+  .colados-table td:nth-child(5),
+  .colados-table td:nth-child(6),
+  .colados-table td:nth-child(7) { display: none; }
+}

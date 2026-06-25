@@ -1,5 +1,120 @@
 import { useState } from "react";
-import { GROUPS, MATCHES, calcStandings, bestThirds, getFacts, getTeam } from "../data";
+import { GROUPS, MATCHES, calcStandings, bestThirds, getFacts, getTeam, isGroupComplete, allStandings } from "../data";
+
+// ── Los Colados ──────────────────────────────────────────────────────────────
+function LosColados({ scores }) {
+  const [open, setOpen] = useState(true);
+  const all = allStandings(scores);
+  const completedGroups = Object.keys(GROUPS).filter(g => isGroupComplete(g, scores)).length;
+  const allComplete = completedGroups === 12;
+
+  // Build list of all 12 thirds with group info
+  const thirds = Object.keys(GROUPS).map(gk => {
+    const s = all[gk];
+    const t = s[2];
+    const complete = isGroupComplete(gk, scores);
+    const played = s.filter(x => x.pj > 0).length;
+    const remaining = 3 - (t?.pj || 0);
+    return { ...t, group: gk, complete, remaining };
+  }).sort((a, b) => {
+    // Sort by pts, then dg, then gf
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.dg !== a.dg) return b.dg - a.dg;
+    return b.gf - a.gf;
+  });
+
+  const anyPlayed = thirds.some(t => t.pj > 0);
+
+  return (
+    <div className="colados-section">
+      <button className="colados-header" onClick={() => setOpen(o => !o)}>
+        <div className="colados-header-left">
+          <span className="colados-title">Los Colados</span>
+          <span className="colados-subtitle">Mejores terceros · {completedGroups}/12 grupos completos</span>
+        </div>
+        <span className="colados-chevron">{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="colados-body">
+          {!anyPlayed && (
+            <div className="colados-empty">Aún no hay partidos jugados. Los Colados aparecerán conforme avance el torneo.</div>
+          )}
+          {anyPlayed && (
+            <>
+              {!allComplete && (
+                <div className="colados-notice">Las posiciones son provisionales hasta que todos los grupos terminen sus 3 partidos.</div>
+              )}
+              <table className="colados-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Equipo</th>
+                    <th>Gr.</th>
+                    <th title="Partidos Jugados">PJ</th>
+                    <th title="Ganados">G</th>
+                    <th title="Empatados">E</th>
+                    <th title="Perdidos">P</th>
+                    <th title="Goles a Favor">GF</th>
+                    <th title="Goles en Contra">GC</th>
+                    <th title="Puntos">Pts</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {thirds.map((t, idx) => {
+                    const isIn = idx < 8;
+                    const isCutLine = idx === 8;
+                    const isProvisional = !t.complete && t.pj > 0;
+                    return (
+                      <>
+                        {isCutLine && (
+                          <tr key="cutline" className="colados-cutline">
+                            <td colSpan={11}>
+                              <div className="cutline-label">— fuera del corte —</div>
+                            </td>
+                          </tr>
+                        )}
+                        <tr key={t.c} className={isIn ? "colados-row-in" : "colados-row-out"}>
+                          <td className="colados-pos">
+                            <span className={`colados-num ${isIn ? "num-in" : "num-out"}`}>{idx + 1}</span>
+                          </td>
+                          <td>
+                            <div className="colados-team-cell">
+                              <span className="colados-flag">{t.f}</span>
+                              <span className="colados-name">{t.c}</span>
+                              {isProvisional && <span className="colados-prov">?</span>}
+                            </div>
+                          </td>
+                          <td className="colados-group">{t.group}</td>
+                          <td>{t.pj}</td>
+                          <td>{t.pg}</td>
+                          <td>{t.pe}</td>
+                          <td>{t.pp}</td>
+                          <td>{t.gf}</td>
+                          <td>{t.gc}</td>
+                          <td><strong>{t.pts}</strong></td>
+                          <td>
+                            {t.complete
+                              ? <span className="colados-done">Completo</span>
+                              : t.pj === 0
+                              ? <span className="colados-pending">Sin jugar</span>
+                              : <span className="colados-pending">Falta {t.remaining} {t.remaining === 1 ? "partido" : "partidos"}</span>
+                            }
+                          </td>
+                        </tr>
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function FormIcon({ result }) {
   if (result === "w") return <div className="fi fi-w">✓</div>;
@@ -141,6 +256,7 @@ function GroupCard({ gk, scores, onScoreChange, isAdmin }) {
 export default function Groups({ scores, onScoreChange, isAdmin }) {
   return (
     <div>
+      <LosColados scores={scores} />
       <div className="legend">
         <div className="leg-item"><div className="leg-dot" style={{ background: "#1a5c35" }} />Clasificado (1° y 2°)</div>
         <div className="leg-item"><div className="leg-dot" style={{ background: "#7d5a0a" }} />Posible mejor 3°</div>
