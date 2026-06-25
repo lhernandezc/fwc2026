@@ -224,3 +224,63 @@ export function confirmedBestThirds(scores) {
     .sort((a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf)
     .slice(0, 8);
 }
+
+// How many matches remain for a team in their group
+function matchesRemaining(teamName, gk, scores) {
+  return (MATCHES[gk] || []).filter((m, i) => {
+    const involved = m[0] === teamName || m[1] === teamName;
+    const sc = scores[gk + "_" + i];
+    const played = sc && sc.h !== "" && sc.a !== "";
+    return involved && !played;
+  }).length;
+}
+
+// Max points a third-place team can still reach
+function maxPossiblePoints(t, gk, scores) {
+  return t.pts + matchesRemaining(t.c, gk, scores) * 3;
+}
+
+// For each third-place team, compute their qualification status:
+// "confirmed" = mathematically guaranteed top 8 no matter what
+// "provisional" = currently in top 8 but could be displaced
+// "out" = currently outside top 8
+// "pending" = hasn't played yet
+export function thirdsWithStatus(scores) {
+  const all = allStandings(scores);
+
+  // Build raw list of all 12 thirds
+  const thirds = Object.keys(GROUPS).map(gk => {
+    const s = all[gk];
+    const t = s[2];
+    const complete = isGroupComplete(gk, scores);
+    const remaining = matchesRemaining(t.c, gk, scores);
+    const maxPts = maxPossiblePoints(t, gk, scores);
+    return { ...t, group: gk, complete, remaining, maxPts };
+  });
+
+  // Sort by current pts → dg → gf (current standings)
+  const sorted = [...thirds].sort((a, b) =>
+    b.pts - a.pts || b.dg - a.dg || b.gf - a.gf
+  );
+
+  // For each team compute status
+  return sorted.map((t, idx) => {
+    if (t.pj === 0) return { ...t, status: "pending" };
+
+    // How many rivals can STRICTLY surpass this team's current points?
+    // A rival can surpass if their maxPts > t.pts
+    const rivalsThatCanSurpass = sorted.filter((r, rIdx) => {
+      if (r.c === t.c) return false;
+      return r.maxPts > t.pts; // strictly greater — ignoring tiebreakers conservatively
+    }).length;
+
+    // If fewer than 8 rivals can surpass this team, it's mathematically confirmed
+    if (rivalsThatCanSurpass < 8) return { ...t, status: "confirmed" };
+
+    // Currently in top 8 but not confirmed
+    if (idx < 8) return { ...t, status: "provisional" };
+
+    // Outside top 8
+    return { ...t, status: "out" };
+  });
+}

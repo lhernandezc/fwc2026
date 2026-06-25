@@ -341,3 +341,18 @@ body {
   .colados-table td:nth-child(6),
   .colados-table td:nth-child(7) { display: none; }
 }
+
+/* ── LOS COLADOS — status badges ─────────────────────────────────────────── */
+.colados-row-confirmed { background: rgba(26,92,53,0.14); }
+.num-confirmed { background: #1a5c35; color: #fff; }
+
+.colados-confirmed {
+  font-size: 10px; font-weight: 600; color: #27ae60;
+  white-space: nowrap; letter-spacing: 0.3px;
+}
+.colados-prov-badge {
+  font-size: 10px; color: #f5a623; white-space: nowrap;
+}
+.colados-out-badge {
+  font-size: 10px; color: #8892a4; white-space: nowrap;
+}
