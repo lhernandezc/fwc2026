@@ -356,3 +356,9 @@ body {
 .colados-out-badge {
   font-size: 10px; color: #8892a4; white-space: nowrap;
 }
+.bm-date {
+  font-size: 9px;
+  color: #8892a4;
+  padding: 3px 6px 0;
+  letter-spacing: 0.3px;
+}
