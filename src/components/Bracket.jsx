@@ -1,203 +1,241 @@
-import { GROUPS, MATCHES, confirmedTop2, confirmedBestThirds, isGroupComplete, calcStandings } from "../data";
+import React from "react";
 
 const TBD = { c: "Por definir", f: "🏳️" };
 
-// Build a descriptive placeholder showing current leader while group is incomplete
-function pendingTeam(gk, pos, scores) {
-  const complete = isGroupComplete(gk, scores);
-  if (complete) return TBD; // shouldn't happen but safeguard
-  const s = calcStandings(gk, scores);
-  const played = s.filter(t => t.pj > 0).length;
-  if (played === 0) return { ...TBD, label: `Grupo ${gk}` };
-  const t = s[pos];
-  if (!t) return { ...TBD, label: `Grupo ${gk}` };
-  // Show current leader but mark as provisional
-  return { c: `${t.c}*`, f: t.f, provisional: true, label: `Grupo ${gk}` };
-}
+const TEAMS = {
+  "Mexico":        { c: "Mexico",        f: "🇲🇽" },
+  "Switzerland":   { c: "Switzerland",   f: "🇨🇭" },
+  "Brazil":        { c: "Brazil",        f: "🇧🇷" },
+  "USA":           { c: "USA",           f: "🇺🇸" },
+  "Germany":       { c: "Germany",       f: "🇩🇪" },
+  "Netherlands":   { c: "Netherlands",   f: "🇳🇱" },
+  "Belgium":       { c: "Belgium",       f: "🇧🇪" },
+  "Spain":         { c: "Spain",         f: "🇪🇸" },
+  "France":        { c: "France",        f: "🇫🇷" },
+  "Argentina":     { c: "Argentina",     f: "🇦🇷" },
+  "Colombia":      { c: "Colombia",      f: "🇨🇴" },
+  "England":       { c: "England",       f: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  "South Africa":  { c: "South Africa",  f: "🇿🇦" },
+  "Canada":        { c: "Canada",        f: "🇨🇦" },
+  "Morocco":       { c: "Morocco",       f: "🇲🇦" },
+  "Japan":         { c: "Japan",         f: "🇯🇵" },
+  "Ivory Coast":   { c: "Ivory Coast",   f: "🇨🇮" },
+  "Norway":        { c: "Norway",        f: "🇳🇴" },
+  "Egypt":         { c: "Egypt",         f: "🇪🇬" },
+  "Australia":     { c: "Australia",     f: "🇦🇺" },
+  "Cape Verde":    { c: "Cape Verde",    f: "🇨🇻" },
+  "Portugal":      { c: "Portugal",      f: "🇵🇹" },
+  "Ghana":         { c: "Ghana",         f: "🇬🇭" },
+  "Croatia":       { c: "Croatia",       f: "🇭🇷" },
+  "Austria":       { c: "Austria",       f: "🇦🇹" },
+  "Ecuador":       { c: "Ecuador",       f: "🇪🇨" },
+  "Sweden":        { c: "Sweden",        f: "🇸🇪" },
+  "Bosnia":        { c: "Bosnia",        f: "🇧🇦" },
+  "Paraguay":      { c: "Paraguay",      f: "🇵🇾" },
+  "Senegal":       { c: "Senegal",       f: "🇸🇳" },
+  "DR Congo":      { c: "DR Congo",      f: "🇨🇩" },
+  "Algeria":       { c: "Algeria",       f: "🇩🇿" },
+};
 
-function winner(t1, t2, sc) {
-  if (!sc || sc.h === "" || sc.a === "") return null;
+function tm(name) { return TEAMS[name] || { c: name, f: "🏳️" }; }
+
+const R32 = [
+  // LEFT SIDE
+  { id:"r32_0",  t1:tm("South Africa"), t2:tm("Canada"),      date:"Jun 28", venue:"SoFi, Los Ángeles" },
+  { id:"r32_1",  t1:tm("Brazil"),       t2:tm("Japan"),       date:"Jun 29", venue:"NRG, Houston" },
+  { id:"r32_2",  t1:tm("Germany"),      t2:tm("Paraguay"),    date:"Jun 29", venue:"Gillette, Boston" },
+  { id:"r32_3",  t1:tm("Netherlands"),  t2:tm("Morocco"),     date:"Jun 29", venue:"BBVA, Monterrey" },
+  { id:"r32_4",  t1:tm("Ivory Coast"),  t2:tm("Norway"),      date:"Jun 30", venue:"AT&T, Dallas" },
+  { id:"r32_5",  t1:tm("France"),       t2:tm("Sweden"),      date:"Jun 30", venue:"MetLife, New Jersey" },
+  { id:"r32_6",  t1:tm("Mexico"),       t2:tm("Ecuador"),     date:"Jun 30", venue:"Azteca, Ciudad de México" },
+  { id:"r32_7",  t1:tm("England"),      t2:tm("DR Congo"),    date:"Jul 1",  venue:"Mercedes-Benz, Atlanta" },
+  // RIGHT SIDE
+  { id:"r32_8",  t1:tm("Belgium"),      t2:tm("Senegal"),     date:"Jul 1",  venue:"Lumen Field, Seattle" },
+  { id:"r32_9",  t1:tm("USA"),          t2:tm("Bosnia"),      date:"Jul 1",  venue:"Levi's, San Francisco" },
+  { id:"r32_10", t1:tm("Spain"),        t2:tm("Austria"),     date:"Jul 2",  venue:"SoFi, Los Ángeles" },
+  { id:"r32_11", t1:tm("Portugal"),     t2:tm("Croatia"),     date:"Jul 2",  venue:"BMO Field, Toronto" },
+  { id:"r32_12", t1:tm("Switzerland"),  t2:tm("Algeria"),     date:"Jul 2",  venue:"BC Place, Vancouver" },
+  { id:"r32_13", t1:tm("Australia"),    t2:tm("Egypt"),       date:"Jul 3",  venue:"AT&T, Dallas" },
+  { id:"r32_14", t1:tm("Argentina"),    t2:tm("Cape Verde"),  date:"Jul 3",  venue:"Hard Rock, Miami" },
+  { id:"r32_15", t1:tm("Colombia"),     t2:tm("Ghana"),       date:"Jul 3",  venue:"Arrowhead, Kansas City" },
+];
+
+function getWinner(match, scores) {
+  const sc = scores[match.id] || {};
+  if (sc.h === "" || sc.a === "" || sc.h == null || sc.a == null) return null;
   const h = +sc.h, a = +sc.a;
-  if (h > a) return t1;
-  if (a > h) return t2;
+  if (h > a) return match.t1;
+  if (a > h) return match.t2;
   return null;
 }
 
-function BracketMatch({ t1, t2, scoreKey, scores, onScore, isAdmin }) {
-  const sc = scores[scoreKey] || { h: "", a: "" };
+// Returns the LOSER of a match (for 3rd place)
+function getLoser(match, scores) {
+  const sc = scores[match.id] || {};
+  if (sc.h === "" || sc.a === "" || sc.h == null || sc.a == null) return null;
+  const h = +sc.h, a = +sc.a;
+  if (h > a) return match.t2;
+  if (a > h) return match.t1;
+  return null;
+}
+
+function buildRound(winners, prefix) {
+  return Array.from({ length: winners.length / 2 }, (_, i) => ({
+    id: `${prefix}_${i}`,
+    t1: winners[i * 2] || TBD,
+    t2: winners[i * 2 + 1] || TBD,
+  }));
+}
+
+function BracketMatch({ match, scores, onScore, isAdmin, compact }) {
+  const sc = scores[match.id] || { h: "", a: "" };
   const h = sc.h !== "" ? +sc.h : null;
   const a = sc.a !== "" ? +sc.a : null;
   const w1 = h !== null && a !== null && h > a;
   const w2 = h !== null && a !== null && a > h;
-  const t1Tbd = !t1 || t1.c === "Por definir" || t1.provisional;
-  const t2Tbd = !t2 || t2.c === "Por definir" || t2.provisional;
-  const canEdit = isAdmin && !t1Tbd && !t2Tbd;
-  const t1display = t1 || TBD;
-  const t2display = t2 || TBD;
+  const t1 = match.t1 || TBD;
+  const t2 = match.t2 || TBD;
+  const isTbd = t1.c === "Por definir" || t2.c === "Por definir";
+  const canEdit = isAdmin && !isTbd;
 
   return (
-    <div className={`bm ${t1Tbd && t2Tbd ? "bm-pending" : ""}`}>
-      <div className={`bt ${w1 ? "winner" : ""} ${t1Tbd ? "tbd-row" : ""}`}>
-        <span className="bf">{t1display.f}</span>
-        <span className="bn" title={t1display.provisional ? "Posición provisional" : ""}>
-          {t1display.c}
-          {t1display.provisional && <span className="provisional-mark"> ?</span>}
-        </span>
+    <div className="bm">
+      {match.date && !compact && (
+        <div className="bm-date">{match.date} · {match.venue}</div>
+      )}
+      {match.date && compact && (
+        <div className="bm-date">{match.date}</div>
+      )}
+      <div className={`bt ${w1 ? "winner" : ""} ${t1.c === "Por definir" ? "tbd-row" : ""}`}>
+        <span className="bf">{t1.f}</span>
+        <span className="bn">{t1.c}</span>
         {canEdit
           ? <input className="bsi" type="number" min="0" value={sc.h} placeholder="-"
-              onChange={e => onScore(scoreKey, "h", e.target.value)} />
-          : <span className="bs">{h !== null && !t1Tbd ? h : ""}</span>}
+              onChange={e => onScore(match.id, "h", e.target.value)} />
+          : <span className="bs">{h !== null ? h : ""}</span>}
       </div>
-      <div className={`bt ${w2 ? "winner" : ""} ${t2Tbd ? "tbd-row" : ""}`}>
-        <span className="bf">{t2display.f}</span>
-        <span className="bn" title={t2display.provisional ? "Posición provisional" : ""}>
-          {t2display.c}
-          {t2display.provisional && <span className="provisional-mark"> ?</span>}
-        </span>
+      <div className={`bt ${w2 ? "winner" : ""} ${t2.c === "Por definir" ? "tbd-row" : ""}`}>
+        <span className="bf">{t2.f}</span>
+        <span className="bn">{t2.c}</span>
         {canEdit
           ? <input className="bsi" type="number" min="0" value={sc.a} placeholder="-"
-              onChange={e => onScore(scoreKey, "a", e.target.value)} />
-          : <span className="bs">{a !== null && !t2Tbd ? a : ""}</span>}
+              onChange={e => onScore(match.id, "a", e.target.value)} />
+          : <span className="bs">{a !== null ? a : ""}</span>}
       </div>
     </div>
   );
 }
 
 export default function Bracket({ scores, onBracketScore, isAdmin }) {
-  // Only use confirmed teams — groups must be fully complete
-  const top2 = {};
-  Object.keys(GROUPS).forEach(gk => {
-    const [first, second] = confirmedTop2(gk, scores);
-    top2[gk] = { first, second };
-  });
-  const thirds = confirmedBestThirds(scores);
+  const r32Winners = R32.map(m => getWinner(m, scores));
+  const r16 = buildRound(r32Winners, "r16");
+  const r16Winners = r16.map(m => getWinner(m, scores));
+  const qf = buildRound(r16Winners, "qf");
+  const qfWinners = qf.map(m => getWinner(m, scores));
+  const sf = buildRound(qfWinners, "sf");
+  const sfWinners = sf.map(m => getWinner(m, scores));
 
-  // Helper: confirmed team or provisional placeholder
-  const get = (gk, pos) => {
-    const t = pos === 0 ? top2[gk].first : top2[gk].second;
-    if (t) return t;
-    return pendingTeam(gk, pos, scores);
+  // Final
+  const finalMatch = {
+    id: "final_0",
+    t1: sfWinners[0] || TBD,
+    t2: sfWinners[1] || TBD,
+    date: "Jul 19",
+    venue: "MetLife, New Jersey"
   };
-  const get3 = i => thirds[i] || { ...TBD, label: `Mejor 3° · puesto ${i + 1}` };
+  const champ = getWinner(finalMatch, scores);
 
-  const allGroupsComplete = Object.keys(GROUPS).every(g => isGroupComplete(g, scores));
+  // 3rd place: losers of both semis
+  const sf0Loser = getLoser(sf[0], scores) || TBD;
+  const sf1Loser = getLoser(sf[1], scores) || TBD;
+  const thirdPlaceMatch = {
+    id: "third_place",
+    t1: sf0Loser,
+    t2: sf1Loser,
+    date: "Jul 18",
+    venue: "MetLife, New Jersey"
+  };
+  const thirdPlace = getWinner(thirdPlaceMatch, scores);
 
-  const r32 = [
-    [get("A",0), get("B",2)],  [get("C",1), get("D",0)],
-    [get("E",0), get("F",2)],  [get("G",1), get("H",0)],
-    [get("I",0), get("J",2)],  [get("K",1), get("L",0)],
-    [get3(0),    get3(1)],     [get3(2),    get3(3)],
-    [get("A",1), get("B",0)],  [get("C",0), get("D",1)],
-    [get("E",1), get("F",0)],  [get("G",0), get("H",1)],
-    [get("I",1), get("J",0)],  [get("K",0), get("L",1)],
-    [get3(4),    get3(5)],     [get3(6),    get3(7)]
-  ];
-
-  // For knockout rounds, only advance confirmed winners
-  const r16 = r32.map((pair, i) => {
-    if (pair[0].provisional || pair[1].provisional) return TBD;
-    return winner(pair[0], pair[1], scores["r32_" + i]) || TBD;
-  });
-  const r16p = [];
-  for (let i = 0; i < 16; i += 2) r16p.push([r16[i], r16[i + 1]]);
-
-  const qf = r16p.map((pair, i) => {
-    if (pair[0].c === "Por definir" || pair[1].c === "Por definir") return TBD;
-    return winner(pair[0], pair[1], scores["r16_" + i]) || TBD;
-  });
-  const qfp = [];
-  for (let i = 0; i < 8; i += 2) qfp.push([qf[i], qf[i + 1]]);
-
-  const sf = qfp.map((pair, i) => {
-    if (pair[0].c === "Por definir" || pair[1].c === "Por definir") return TBD;
-    return winner(pair[0], pair[1], scores["qf_" + i]) || TBD;
-  });
-
-  const fin = [
-    sf[0].c !== "Por definir" && sf[1].c !== "Por definir" ? winner(sf[0], sf[1], scores["sf_0"]) || TBD : TBD,
-    sf[2].c !== "Por definir" && sf[3].c !== "Por definir" ? winner(sf[2], sf[3], scores["sf_1"]) || TBD : TBD
-  ];
-  const champ = fin[0].c !== "Por definir" && fin[1].c !== "Por definir"
-    ? winner(fin[0], fin[1], scores["final_0"]) || TBD
-    : TBD;
-
-  const bm = (t1, t2, key) => (
-    <BracketMatch key={key} t1={t1} t2={t2} scoreKey={key}
-      scores={scores} onScore={onBracketScore} isAdmin={isAdmin} />
+  const bm = (match, compact) => (
+    <BracketMatch key={match.id} match={match} scores={scores}
+      onScore={onBracketScore} isAdmin={isAdmin} compact={compact} />
   );
-
-  // Count how many groups are complete
-  const completedGroups = Object.keys(GROUPS).filter(g => isGroupComplete(g, scores)).length;
 
   return (
     <div>
       <div className="bracket-info">
-        El bracket se actualiza solo con clasificaciones <strong>confirmadas</strong> — grupo completo (6 partidos jugados).
-        {!allGroupsComplete && (
-          <span className="bracket-progress"> · {completedGroups}/12 grupos completos</span>
-        )}
+        Bracket oficial Ronda de 32 — FIFA World Cup 2026. Ingresa los marcadores para avanzar el torneo.
       </div>
-      {!allGroupsComplete && (
-        <div className="bracket-notice">
-          <span>⏳</span>
-          <span>
-            Los cruces marcados con <strong>?</strong> muestran el líder provisional — pueden cambiar cuando termine el grupo.
-            {completedGroups === 0 && " Los cruces se confirmarán conforme terminen los grupos."}
-          </span>
+
+      {/* Champion + 3rd place display */}
+      {(champ || thirdPlace) && (
+        <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+          {champ && (
+            <div className="champ-box" style={{ flex: 1, minWidth: 140 }}>
+              <div style={{ fontSize: 36 }}>{champ.f}</div>
+              <div style={{ fontSize: 15, fontWeight: 500, marginTop: 4 }}>🏆 {champ.c}</div>
+              <div style={{ fontSize: 11, color: "#8892a4", marginTop: 2 }}>Campeón Mundial 2026</div>
+            </div>
+          )}
+          {thirdPlace && (
+            <div className="champ-box" style={{ flex: 1, minWidth: 140, background: "rgba(125,90,10,0.1)", borderColor: "rgba(125,90,10,0.35)" }}>
+              <div style={{ fontSize: 36 }}>{thirdPlace.f}</div>
+              <div style={{ fontSize: 15, fontWeight: 500, marginTop: 4 }}>🥉 {thirdPlace.c}</div>
+              <div style={{ fontSize: 11, color: "#8892a4", marginTop: 2 }}>Tercer lugar</div>
+            </div>
+          )}
         </div>
       )}
-      {champ.c !== "Por definir" && (
-        <div className="champ-box">
-          <div style={{ fontSize: 42 }}>{champ.f}</div>
-          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4 }}>🏆 {champ.c}</div>
-          <div style={{ fontSize: 12, color: "#8892a4", marginTop: 2 }}>Campeón Mundial 2026</div>
-        </div>
-      )}
+
       <div className="bracket-container">
         <div className="bracket-rounds">
+          {/* LEFT SIDE */}
           <div className="round-col">
             <div className="round-title">Ronda de 32</div>
-            {r32.slice(0, 8).map((_, i) => bm(r32[i][0], r32[i][1], "r32_" + i))}
+            {R32.slice(0, 8).map(m => bm(m))}
           </div>
           <div className="round-col">
             <div className="round-title">Ronda de 16</div>
-            <div style={{ marginTop: 22 }}>
-              {r16p.slice(0, 4).map(([a, b], i) => bm(a, b, "r16_" + i))}
-            </div>
+            <div style={{ marginTop: 36 }}>{r16.slice(0, 4).map(m => bm(m))}</div>
           </div>
           <div className="round-col">
             <div className="round-title">Cuartos</div>
-            <div style={{ marginTop: 66 }}>
-              {qfp.slice(0, 2).map(([a, b], i) => bm(a, b, "qf_" + i))}
+            <div style={{ marginTop: 100 }}>{qf.slice(0, 2).map(m => bm(m))}</div>
+          </div>
+          <div className="round-col">
+            <div className="round-title">Semifinal</div>
+            <div style={{ marginTop: 196 }}>{bm(sf[0])}</div>
+          </div>
+
+          {/* CENTER — Final + 3rd place */}
+          <div className="round-col" style={{ minWidth: 160 }}>
+            <div className="round-title">Final · Jul 19</div>
+            <div style={{ marginTop: 292 }}>{bm(finalMatch)}</div>
+            <div style={{ marginTop: 16 }}>
+              <div className="round-title" style={{ borderBottom: "none", color: "#7d5a0a", marginBottom: 4 }}>
+                Tercer Lugar · Jul 18
+              </div>
+              {bm(thirdPlaceMatch, true)}
             </div>
           </div>
+
+          {/* RIGHT SIDE */}
           <div className="round-col">
             <div className="round-title">Semifinal</div>
-            <div style={{ marginTop: 132 }}>{bm(sf[0], sf[1], "sf_0")}</div>
-          </div>
-          <div className="round-col">
-            <div className="round-title">Final</div>
-            <div style={{ marginTop: 200 }}>{bm(fin[0], fin[1], "final_0")}</div>
-          </div>
-          <div className="round-col">
-            <div className="round-title">Semifinal</div>
-            <div style={{ marginTop: 132 }}>{bm(sf[2], sf[3], "sf_1")}</div>
+            <div style={{ marginTop: 196 }}>{bm(sf[1])}</div>
           </div>
           <div className="round-col">
             <div className="round-title">Cuartos</div>
-            <div style={{ marginTop: 66 }}>
-              {qfp.slice(2).map(([a, b], i) => bm(a, b, "qf_" + (i + 2)))}
-            </div>
+            <div style={{ marginTop: 100 }}>{qf.slice(2).map(m => bm(m))}</div>
           </div>
           <div className="round-col">
             <div className="round-title">Ronda de 16</div>
-            <div style={{ marginTop: 22 }}>
-              {r16p.slice(4).map(([a, b], i) => bm(a, b, "r16_" + (i + 4)))}
-            </div>
+            <div style={{ marginTop: 36 }}>{r16.slice(4).map(m => bm(m))}</div>
           </div>
           <div className="round-col">
             <div className="round-title">Ronda de 32</div>
-            {r32.slice(8).map((_, i) => bm(r32[i + 8][0], r32[i + 8][1], "r32_" + (i + 8)))}
+            {R32.slice(8).map(m => bm(m))}
           </div>
         </div>
       </div>
