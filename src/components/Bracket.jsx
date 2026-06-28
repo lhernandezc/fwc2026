@@ -39,24 +39,28 @@ const TEAMS = {
 
 function tm(name) { return TEAMS[name] || { c: name, f: "🏳️" }; }
 
-// Official R32 — left side [0-7], right side [8-15]
+// Official R32 — ordered top-to-bottom matching FIFA bracket layout
+// Left side [0-7]: M74,M77,M73,M75,M83,M84,M81,M82
+// Right side [8-15]: M76,M78,M79,M80,M86,M88,M85,M87
 const R32 = [
-  { id:"r32_0",  t1:tm("South Africa"), t2:tm("Canada"),     date:"Jun 28" },
-  { id:"r32_1",  t1:tm("Brazil"),       t2:tm("Japan"),      date:"Jun 29" },
-  { id:"r32_2",  t1:tm("Germany"),      t2:tm("Paraguay"),   date:"Jun 29" },
-  { id:"r32_3",  t1:tm("Netherlands"),  t2:tm("Morocco"),    date:"Jun 29" },
-  { id:"r32_4",  t1:tm("Ivory Coast"),  t2:tm("Norway"),     date:"Jun 30" },
-  { id:"r32_5",  t1:tm("France"),       t2:tm("Sweden"),     date:"Jun 30" },
-  { id:"r32_6",  t1:tm("Mexico"),       t2:tm("Ecuador"),    date:"Jun 30" },
-  { id:"r32_7",  t1:tm("England"),      t2:tm("DR Congo"),   date:"Jul 1"  },
-  { id:"r32_8",  t1:tm("Belgium"),      t2:tm("Senegal"),    date:"Jul 1"  },
-  { id:"r32_9",  t1:tm("USA"),          t2:tm("Bosnia"),     date:"Jul 1"  },
-  { id:"r32_10", t1:tm("Spain"),        t2:tm("Austria"),    date:"Jul 2"  },
-  { id:"r32_11", t1:tm("Portugal"),     t2:tm("Croatia"),    date:"Jul 2"  },
-  { id:"r32_12", t1:tm("Switzerland"),  t2:tm("Algeria"),    date:"Jul 2"  },
-  { id:"r32_13", t1:tm("Australia"),    t2:tm("Egypt"),      date:"Jul 3"  },
-  { id:"r32_14", t1:tm("Argentina"),    t2:tm("Cape Verde"), date:"Jul 3"  },
-  { id:"r32_15", t1:tm("Colombia"),     t2:tm("Ghana"),      date:"Jul 3"  },
+  // LEFT SIDE (top → bottom)
+  { id:"r32_0",  t1:tm("Germany"),      t2:tm("Paraguay"),   date:"Jun 29" }, // M74
+  { id:"r32_1",  t1:tm("France"),       t2:tm("Sweden"),     date:"Jun 30" }, // M77
+  { id:"r32_2",  t1:tm("South Africa"), t2:tm("Canada"),     date:"Jun 28" }, // M73
+  { id:"r32_3",  t1:tm("Netherlands"),  t2:tm("Morocco"),    date:"Jun 29" }, // M75
+  { id:"r32_4",  t1:tm("Portugal"),     t2:tm("Croatia"),    date:"Jul 2"  }, // M83
+  { id:"r32_5",  t1:tm("Spain"),        t2:tm("Austria"),    date:"Jul 2"  }, // M84
+  { id:"r32_6",  t1:tm("USA"),          t2:tm("Bosnia"),     date:"Jul 1"  }, // M81
+  { id:"r32_7",  t1:tm("Belgium"),      t2:tm("Senegal"),    date:"Jul 1"  }, // M82
+  // RIGHT SIDE (top → bottom)
+  { id:"r32_8",  t1:tm("Brazil"),       t2:tm("Japan"),      date:"Jun 29" }, // M76
+  { id:"r32_9",  t1:tm("Ivory Coast"),  t2:tm("Norway"),     date:"Jun 30" }, // M78
+  { id:"r32_10", t1:tm("Mexico"),       t2:tm("Ecuador"),    date:"Jun 30" }, // M79
+  { id:"r32_11", t1:tm("England"),      t2:tm("DR Congo"),   date:"Jul 1"  }, // M80
+  { id:"r32_12", t1:tm("Argentina"),    t2:tm("Cape Verde"), date:"Jul 3"  }, // M86
+  { id:"r32_13", t1:tm("Australia"),    t2:tm("Egypt"),      date:"Jul 3"  }, // M88
+  { id:"r32_14", t1:tm("Switzerland"),  t2:tm("Algeria"),    date:"Jul 2"  }, // M85
+  { id:"r32_15", t1:tm("Colombia"),     t2:tm("Ghana"),      date:"Jul 3"  }, // M87
 ];
 
 function getWinner(match, scores) {
