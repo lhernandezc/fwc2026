@@ -472,7 +472,6 @@ export default function Bracket({ scores, onBracketScore, isAdmin }) {
               <div style={{fontSize:10, color:"#7d5a0a", fontWeight:500, textTransform:"uppercase",
                 letterSpacing:"0.4px", marginBottom:4}}>Tercer Lugar · Jul 18</div>
             </div>
-            {renderCard(thirdMatch, COL.final, 0, 0) /* positioned manually below */}
             {(() => {
               const x = colX(COL.final);
               const y = THIRD_Y;
