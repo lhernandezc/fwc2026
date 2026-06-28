@@ -247,6 +247,7 @@ function maxPossiblePoints(t, gk, scores) {
 // "pending" = hasn't played yet
 export function thirdsWithStatus(scores) {
   const all = allStandings(scores);
+  const allComplete = Object.keys(GROUPS).every(g => isGroupComplete(g, scores));
 
   // Build raw list of all 12 thirds
   const thirds = Object.keys(GROUPS).map(gk => {
@@ -267,14 +268,19 @@ export function thirdsWithStatus(scores) {
   return sorted.map((t, idx) => {
     if (t.pj === 0) return { ...t, status: "pending" };
 
-    // How many rivals can STRICTLY surpass this team's current points?
-    // A rival can surpass if their maxPts > t.pts
-    const rivalsThatCanSurpass = sorted.filter((r, rIdx) => {
+    // When ALL groups are complete, classification is final — use position directly
+    if (allComplete) {
+      return { ...t, status: idx < 8 ? "confirmed" : "out" };
+    }
+
+    // During group stage: mathematical confirmation check
+    // Count rivals whose max possible points strictly exceed this team's current points
+    const rivalsThatCanSurpass = sorted.filter(r => {
       if (r.c === t.c) return false;
-      return r.maxPts > t.pts; // strictly greater — ignoring tiebreakers conservatively
+      return r.maxPts > t.pts;
     }).length;
 
-    // If fewer than 8 rivals can surpass this team, it's mathematically confirmed
+    // If fewer than 8 rivals can surpass → mathematically confirmed top 8
     if (rivalsThatCanSurpass < 8) return { ...t, status: "confirmed" };
 
     // Currently in top 8 but not confirmed
